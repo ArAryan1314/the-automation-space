@@ -119,12 +119,14 @@ See **`STYLE_GUIDE.md`** for the design system and **`CHANGELOG.md`** for releas
 
 This folder is the root of the public repository `ArAryan1314/the-automation-space`.
 
+- **Branches:** features go on `feature/<name>` and fixes on `bugfix/<name>`, and reach `main` through a pull request. See `CONTRIBUTING.md`.
 - **Sync:** the Windows task `AutomationSpace GitHub Sync` (set up by `pnpm sync:install`) runs `pnpm sync` every 15 minutes
-  while you are signed in. Every saved change is published, including unfinished work. Results are logged to `.git/github-sync.log`.
+  while you are signed in. It publishes every saved change on the `feature/` or `bugfix/` branch you are on, including unfinished
+  work, and never commits to `main`. Results are logged to `.git/github-sync.log`.
 - **Safety:** a sync stops without committing if it would include `.env*` (except `.env.example`), `.data/`, the GoDaddy bundle,
   a key file, a value from `.env.local`, or something that looks like an API key.
 - **Stored data:** form submissions stay in `.data/` or `DATA_DIR` and are never sent to GitHub, because the repository is public.
-- **CI:** each push builds the Linux deployment bundle, runs typecheck and lint, starts the bundle and requests key routes.
+- **CI:** each push and pull request builds the Linux deployment bundle, runs typecheck and lint, starts the bundle and requests key routes.
   Download the result from the run's `godaddy-linux-bundle` artifact. It has no real secrets, so set the variables on the host.
 
 To stop syncing, run `Unregister-ScheduledTask -TaskName 'AutomationSpace GitHub Sync' -Confirm:$false` in PowerShell.

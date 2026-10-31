@@ -2,7 +2,7 @@ name: CI
 
 on:
   push:
-    branches: [main]
+    branches: [main, "feature/**", "bugfix/**"]
   pull_request:
   workflow_dispatch:
 
@@ -15,6 +15,21 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Keep this pattern the same as BRANCH_PATTERN in scripts/sync-github.js. See CONTRIBUTING.md.
+  branch-name:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Require a feature/ or bugfix/ branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          echo "Branch: $HEAD_REF"
+          if ! printf '%s' "$HEAD_REF" | grep -Eq '^(feature|bugfix)/[a-z0-9][a-z0-9._-]*$'; then
+            echo "::error::Branch names must look like feature/<short-name> or bugfix/<short-name>."
+            exit 1
+          fi
+
   check:
     runs-on: ubuntu-latest
     timeout-minutes: 20
