@@ -1,0 +1,123 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens — "Neon Automation" dark theme.
+ * Use the semantic utilities (bg-background, bg-card, text-foreground,
+ * text-muted-foreground, border-border, bg-primary, text-primary,
+ * bg-primary-soft, bg-surface, bg-ink, text-body …) instead of raw palette colors
+ * so every page stays visually consistent.
+ */
+@theme {
+  --color-background: #050b14;
+  --color-foreground: #eaf6fb;
+  --color-card: #0b1726;
+  --color-card-foreground: #eaf6fb;
+  --color-surface: #0f2133;
+  --color-muted: #0f2133;
+  --color-body: #c3d3e2;
+  --color-muted-foreground: #9fb3c8;
+  --color-subtle-foreground: #7f95ab;
+  --color-border: #1b3147;
+  --color-border-strong: #2a4a68;
+  --color-input: #2a4a68;
+  --color-ring: #22d3ee;
+
+  --color-primary: #22d3ee;
+  --color-primary-hover: #67e8f9;
+  --color-primary-foreground: #03141d;
+  --color-primary-soft: #082a35;
+  --color-primary-muted: #0e4a5a;
+
+  --color-accent: #60a5fa;
+  --color-accent-soft: #0f2347;
+
+  --color-ink: #0a2036;
+  --color-ink-soft: #12304d;
+
+  --color-success: #34d399;
+  --color-warning: #fbbf24;
+  --color-destructive: #dc2626;
+
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", "Cascadia Code", Menlo, monospace;
+
+  --shadow-soft: 0 1px 2px rgba(0, 0, 0, 0.4), 0 4px 16px -4px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 0 0 1px rgba(34, 211, 238, 0.12), 0 16px 40px -12px rgba(34, 211, 238, 0.2);
+}
+
+@layer base {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background-color: var(--color-primary-muted);
+    color: var(--color-foreground);
+  }
+
+  *:focus-visible {
+    outline: 2px solid var(--color-ring);
+    outline-offset: 2px;
+  }
+}
+
+/* Highlighted heading text */
+.gradient-text {
+  background: linear-gradient(120deg, #22d3ee 0%, #38bdf8 55%, #60a5fa 100%);
+  filter: drop-shadow(0 0 18px rgba(34, 211, 238, 0.35));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Cyan glow and faint tech grid used behind hero areas */
+.hero-wash {
+  background:
+    radial-gradient(60% 70% at 15% 0%, rgba(34, 211, 238, 0.16) 0%, transparent 70%),
+    radial-gradient(50% 60% at 90% 10%, rgba(59, 130, 246, 0.16) 0%, transparent 70%),
+    linear-gradient(rgba(34, 211, 238, 0.035) 1px, transparent 1px) 0 0 / 48px 48px,
+    linear-gradient(90deg, rgba(34, 211, 238, 0.035) 1px, transparent 1px) 0 0 / 48px 48px;
+}
+
+/* Glowing call-to-action panel */
+.panel-glow {
+  background:
+    radial-gradient(70% 120% at 0% 0%, rgba(34, 211, 238, 0.22) 0%, transparent 65%),
+    radial-gradient(60% 120% at 100% 100%, rgba(59, 130, 246, 0.24) 0%, transparent 65%),
+    var(--color-card);
+}
+
+/* Faint dotted texture for feature panels */
+.bg-dots {
+  background-image: radial-gradient(rgba(34, 211, 238, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.25s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up {
+    animation: none;
+  }
+}
