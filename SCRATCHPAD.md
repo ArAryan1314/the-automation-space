@@ -36,7 +36,7 @@ Each page exports `metadata = pageMetadata(key)`; the key is its entry in `SITE_
 - Env: `NEXT_PUBLIC_SITE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `DATA_DIR`, `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`, `SMTP_FROM`, `ADMIN_NOTIFY_EMAIL` — documented in `.env.example`. Empty `SMTP_HOST` means no emails are sent.
 - Admin login: `pnpm admin:create [username] [password]` writes the hash to `.env.local`.
 - After code changes: `pnpm graph:rebuild` from the parent `nextDev/` folder.
-- GitHub: this folder is the repo root (`ArAryan1314/the-automation-space`, public). The scheduled task `AutomationSpace GitHub Sync` runs `pnpm sync` every 15 minutes while signed in; its log is `.git/github-sync.log`. Never commit `.env*`, `.data/` or the GoDaddy bundle.
+- GitHub: this folder is the repo root (`ArAryan1314/the-automation-space`, public). Work on `feature/<name>` or `bugfix/<name>` and merge to `main` by pull request (see `CONTRIBUTING.md`). The scheduled task `AutomationSpace GitHub Sync` runs `pnpm sync` every 15 minutes while signed in and pushes the current branch, never `main`; its log is `.git/github-sync.log`. Never commit `.env*`, `.data/` or the GoDaddy bundle.
 - GoDaddy bundle: `pnpm build:godaddy` writes `godaddy-dist/` and `godaddy-deployment.zip` (flat `node_modules`, no links). Tested by running it extracted on Windows only, not yet on the Linux host.
 
 ## Data Persistence & Hosting Architecture

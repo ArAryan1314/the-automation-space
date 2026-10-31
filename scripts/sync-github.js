@@ -1,5 +1,6 @@
-// Commits local changes and pushes them to GitHub. The repository is public, so
-// the run stops without committing if a private file or secret would be included.
+// Commits local changes on a feature/ or bugfix/ branch and pushes that branch to GitHub.
+// main only changes through pull requests, so here it is only brought up to date (see CONTRIBUTING.md).
+// The repository is public, so the run stops without committing if a private file or secret would be included.
 //
 //   node scripts/sync-github.js          commit and push
 //   node scripts/sync-github.js --check  report what would be committed, change nothing
@@ -8,7 +9,9 @@ const fs = require('fs');
 const path = require('path');
 
 const ROOT = path.resolve(__dirname, '..');
-const BRANCH = 'main';
+const MAIN_BRANCH = 'main';
+// Keep this the same as the branch-name job in .github/workflows/ci.yml.
+const BRANCH_PATTERN = /^(feature|bugfix)\/[a-z0-9][a-z0-9._-]*$/;
 const LOG_FILE = path.join(ROOT, '.git', 'github-sync.log');
 const MAX_LOG_BYTES = 1024 * 1024;
 const MAX_SCAN_BYTES = 5 * 1024 * 1024;
@@ -69,11 +72,32 @@ function findProblems(paths) {
   return problems;
 }
 
+function updateMain() {
+  if (git('status', '--porcelain')) {
+    throw new Error('nothing sent: main only changes through pull requests. Move this work to a branch with "git switch -c feature/<name>" or "git switch -c bugfix/<name>".');
+  }
+  if (CHECK_ONLY) {
+    log('check passed: main has no local changes, nothing to send');
+    return;
+  }
+  git('fetch', '-q', 'origin', MAIN_BRANCH);
+  if (Number(git('rev-list', '--count', `origin/${MAIN_BRANCH}..HEAD`)) > 0) {
+    throw new Error('nothing sent: local main has commits that are not on GitHub. Move them to a feature/ or bugfix/ branch.');
+  }
+  git('merge', '-q', '--ff-only', `origin/${MAIN_BRANCH}`);
+}
+
 function main() {
   const branch = git('rev-parse', '--abbrev-ref', 'HEAD');
-  if (branch !== BRANCH) throw new Error(`on branch "${branch}", expected "${BRANCH}"`);
   if (fs.existsSync(path.join(ROOT, '.git', 'rebase-merge')) || fs.existsSync(path.join(ROOT, '.git', 'MERGE_HEAD'))) {
     throw new Error('a merge or rebase is in progress');
+  }
+  if (branch === MAIN_BRANCH) {
+    updateMain();
+    return;
+  }
+  if (!BRANCH_PATTERN.test(branch)) {
+    throw new Error(`nothing sent: branch "${branch}" must be named feature/<name> or bugfix/<name>.`);
   }
 
   git('add', '-A');
@@ -93,18 +117,24 @@ function main() {
     git('commit', '-q', '-m', `Auto-sync: ${changed.length + removed.length} file(s) updated`);
   }
 
-  git('fetch', '-q', 'origin', BRANCH);
+  if (!git('ls-remote', '--heads', 'origin', `refs/heads/${branch}`)) {
+    git('push', '-q', '-u', 'origin', branch);
+    log(`pushed new branch ${branch}, now at ${git('rev-parse', '--short', 'HEAD')}`);
+    return;
+  }
+
+  git('fetch', '-q', 'origin', branch);
   try {
-    git('rebase', '-q', `origin/${BRANCH}`);
+    git('rebase', '-q', 'FETCH_HEAD');
   } catch (error) {
     git('rebase', '--abort');
     throw new Error(`GitHub has changes that conflict with local ones. Resolve them by hand. ${error.message}`);
   }
 
-  const ahead = Number(git('rev-list', '--count', `origin/${BRANCH}..HEAD`));
+  const ahead = Number(git('rev-list', '--count', 'FETCH_HEAD..HEAD'));
   if (ahead === 0) return; // Quiet when idle, so the log only records real syncs.
-  git('push', '-q', 'origin', BRANCH);
-  log(`pushed ${ahead} commit(s), now at ${git('rev-parse', '--short', 'HEAD')}`);
+  git('push', '-q', 'origin', branch);
+  log(`pushed ${ahead} commit(s) to ${branch}, now at ${git('rev-parse', '--short', 'HEAD')}`);
 }
 
 try {

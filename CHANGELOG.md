@@ -4,6 +4,17 @@ All notable changes and architectural updates across the repository are document
 
 ---
 
+## [4.9.0] - 2026-10-31
+
+### Added
+- Branching strategy in `CONTRIBUTING.md`: `feature/<name>` and `bugfix/<name>` branches reach `main` through a pull request.
+- A `branch-name` CI check that fails pull requests from branches not following that naming.
+
+### Changed
+- `pnpm sync` now commits and pushes the current `feature/` or `bugfix/` branch. On `main` it sends nothing and only updates from
+  GitHub, and it refuses any other branch.
+- CI also runs on pushes to `feature/` and `bugfix/` branches.
+
 ## [4.8.0] - 2026-10-31
 
 ### Added
