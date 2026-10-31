@@ -198,7 +198,7 @@ export function DocumentationView() {
                       <span>Candidate Portal (/candidate-login)</span>
                     </h2>
                     <p className="text-[15px] text-body leading-relaxed max-w-prose">
-                      Job seekers request an account and can sign in only after a super admin approves it. They then see the jobs they applied for with the same email address. Candidates can never see other applicants&apos; profiles or internal agency notes.
+                      Job seekers request an account and can sign in only after a super admin approves it. They then see the jobs they applied for while signed in. Candidates can never see other applicants&apos; profiles or internal agency notes.
                     </p>
                   </div>
 

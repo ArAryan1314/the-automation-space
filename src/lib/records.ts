@@ -41,4 +41,6 @@ export interface ApplicationRecord {
   name: string;
   email: string;
   profileUrl: string;
+  /** The candidate account signed in when this was sent, if any. Older records do not have it. */
+  candidateId?: string | null;
 }

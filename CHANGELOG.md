@@ -4,6 +4,23 @@ All notable changes and architectural updates across the repository are document
 
 ---
 
+## [4.8.0] - 2026-10-31
+
+### Added
+- Outgoing email through `lib/server/email.ts` (`nodemailer`), set up with `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASSWORD`,
+  `SMTP_FROM` and `ADMIN_NOTIFY_EMAIL`. The super admin is told about new account requests, and candidates are told when they are
+  approved or rejected. With no `SMTP_HOST`, nothing is sent and the site works as before.
+- Candidate password reset: a "Forgot your password?" form emails a one-hour, single-use link. Only the token's hash is stored,
+  and a new password ends existing sessions. A reset never gets around approval.
+- A "Password reset link" button in the console's Pending candidates tab, for sites without email.
+
+### Changed
+- A candidate's dashboard now lists the applications sent while signed in to that account (`candidateId`), not every application
+  with the same email. Anyone can type an email address, so that match let strangers add to a candidate's dashboard. Applications
+  sent before this version, or while signed out, have no link and appear only in the console.
+- The GoDaddy bundle's `.env.production.sample` and README now list the login, `DATA_DIR` and email settings. `DATA_DIR` must be
+  outside the application root so that uploads cannot wipe stored accounts.
+
 ## [4.7.0] - 2026-10-31
 
 ### Added

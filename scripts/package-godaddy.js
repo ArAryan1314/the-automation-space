@@ -167,7 +167,22 @@ NODE_ENV=production
 PORT=3000
 HOSTNAME=0.0.0.0
 
-# Gemini AI Integration (Required for /api/ai-respond)
+# Super admin login. Create it with "pnpm admin:create" on your computer and copy the two values here.
+ADMIN_USERNAME=
+ADMIN_PASSWORD_HASH=
+
+# Stored data. Use a folder outside the application root, so a new upload cannot touch it.
+DATA_DIR=/home/YOUR_CPANEL_USER/automation-space-data
+
+# Outgoing email. From cPanel > Email Accounts > Connect Devices. Empty SMTP_HOST means no emails are sent.
+SMTP_HOST=
+SMTP_PORT=587
+SMTP_USER=
+SMTP_PASSWORD=
+SMTP_FROM=
+ADMIN_NOTIFY_EMAIL=
+
+# Gemini AI Integration (Optional: empty means a standard template reply)
 GEMINI_API_KEY=
 GEMINI_MODEL=gemini-2.5-flash
 `;
@@ -216,8 +231,13 @@ STEP 3: Upload Application Files
 
 STEP 4: Set Environment Variables
 ---------------------------------
-1. Open the .env file in File Manager (or configure environment variables in "Setup Node.js App"):
-   GEMINI_API_KEY=your_actual_gemini_api_key
+1. Open the .env file in File Manager (or configure environment variables in "Setup Node.js App").
+   .env.production.sample lists every variable. Check these before starting:
+   ADMIN_USERNAME and ADMIN_PASSWORD_HASH   the super admin login
+   DATA_DIR=/home/YOUR_CPANEL_USER/automation-space-data
+                                            MUST be outside the application root. Otherwise stored
+                                            accounts and applications can be lost when you replace the app.
+   SMTP_HOST, SMTP_USER, SMTP_PASSWORD      for emails. Without them no emails are sent.
    PORT=3000
    NODE_ENV=production
 

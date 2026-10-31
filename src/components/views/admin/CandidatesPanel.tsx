@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Clock, Mail, Trash2, UserCheck, X } from "lucide-react";
-import { Badge, Button, Card, CardTitle, IconBox } from "@/components/ui";
+import { Check, Clock, KeyRound, Mail, Trash2, UserCheck, X } from "lucide-react";
+import { Badge, Button, Card, CardTitle, IconBox, Input } from "@/components/ui";
 import type { CandidateAccountRecord, CandidateStatus } from "@/lib/records";
 import { ApiError, callApi, formatDateTime } from "./adminApi";
 
@@ -20,11 +20,18 @@ const STATUS_BADGE: Record<CandidateStatus, { label: string; variant: "warning" 
 
 export function CandidatesPanel({ candidates, onChanged, onSessionExpired }: CandidatesPanelProps) {
   const [error, setError] = useState("");
+  const [resetLink, setResetLink] = useState<{ id: string; link: string } | null>(null);
 
-  const act = async (action: "approve" | "reject" | "delete", candidate: CandidateAccountRecord) => {
+  const act = async (action: "approve" | "reject" | "delete" | "reset-link", candidate: CandidateAccountRecord) => {
     if (action === "delete" && !window.confirm(`Delete the account for ${candidate.name}? This cannot be undone.`)) return;
     setError("");
+    setResetLink(null);
     try {
+      if (action === "reset-link") {
+        const { link } = await callApi<{ link: string }>("/api/candidates", { action, id: candidate.id });
+        setResetLink({ id: candidate.id, link });
+        return;
+      }
       await callApi("/api/candidates", { action, id: candidate.id });
       onChanged();
     } catch (err) {
@@ -84,12 +91,31 @@ export function CandidatesPanel({ candidates, onChanged, onSessionExpired }: Can
                   <span>{candidate.status === "approved" ? "Revoke access" : "Reject"}</span>
                 </Button>
               )}
+              {candidate.status === "approved" && (
+                <Button variant="ghost" size="sm" onClick={() => act("reset-link", candidate)}>
+                  <KeyRound className="h-3.5 w-3.5" />
+                  <span>Password reset link</span>
+                </Button>
+              )}
               <Button variant="ghost" size="sm" onClick={() => act("delete", candidate)} className="text-red-300">
                 <Trash2 className="h-3.5 w-3.5" />
                 <span>Delete</span>
               </Button>
             </div>
           </div>
+          {resetLink?.id === candidate.id && (
+            <div className="pt-3 border-t border-border space-y-2">
+              <p className="text-xs text-muted-foreground">
+                Send this to {candidate.name} privately. It works once and expires in one hour.
+              </p>
+              <Input
+                readOnly
+                aria-label={`Password reset link for ${candidate.name}`}
+                value={resetLink.link}
+                onFocus={(e) => e.target.select()}
+              />
+            </div>
+          )}
         </Card>
       ))}
     </div>

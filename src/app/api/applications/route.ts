@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { z } from "zod";
 import { isAdmin } from "@/lib/server/auth";
+import { currentCandidate } from "@/lib/server/candidates";
 import { fail, invalid, ok, readBody, serverError } from "@/lib/server/http";
 import { readJobs } from "@/lib/server/jobs";
 import { newId, readRecords, updateRecords } from "@/lib/server/store";
@@ -58,6 +59,8 @@ export async function POST(request: NextRequest) {
       timestamp: new Date().toISOString(),
       ...validation.data,
       jobTitle: job.title,
+      // Linked to the session, not the typed email, so nobody can add to another candidate's dashboard.
+      candidateId: (await currentCandidate(request))?.id ?? null,
     };
     await updateRecords<ApplicationRecord>(FILE, (records) => [application, ...records]);
     return ok({ id: application.id });
