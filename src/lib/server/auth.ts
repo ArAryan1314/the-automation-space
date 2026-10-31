@@ -1,4 +1,4 @@
-import { createHash, createHmac, pbkdf2, timingSafeEqual } from "crypto";
+import { createHash, createHmac, pbkdf2, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import type { NextRequest } from "next/server";
 import { readRecords, updateRecords } from "./store";
@@ -8,6 +8,7 @@ export const SESSION_SECONDS = 8 * 60 * 60;
 const ATTEMPTS_FILE = "login-attempts.json";
 const MAX_FAILURES = 10;
 const WINDOW_MS = 15 * 60 * 1000;
+const HASH_ITERATIONS = 600000;
 
 const derive = promisify(pbkdf2);
 
@@ -18,19 +19,30 @@ function credentials() {
   };
 }
 
-function safeEqual(a: string, b: string): boolean {
+export function safeEqual(a: string, b: string): boolean {
   const left = createHash("sha256").update(a).digest();
   const right = createHash("sha256").update(b).digest();
   return timingSafeEqual(left, right);
 }
 
+export async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16);
+  const derived = await derive(password, salt, HASH_ITERATIONS, 32, "sha256");
+  return `pbkdf2:${HASH_ITERATIONS}:${salt.toString("hex")}:${derived.toString("hex")}`;
+}
+
+export async function verifyPassword(password: string, stored: string): Promise<boolean> {
+  const [scheme, iterations, salt, hash] = stored.split(":");
+  if (scheme !== "pbkdf2" || !iterations || !salt || !hash) return false;
+  const derived = await derive(password, Buffer.from(salt, "hex"), Number(iterations), 32, "sha256");
+  return safeEqual(derived.toString("hex"), hash);
+}
+
 export async function checkLogin(username: string, password: string): Promise<boolean> {
   const expected = credentials();
-  const [scheme, iterations, salt, hash] = expected.passwordHash.split(":");
-  if (scheme !== "pbkdf2" || !iterations || !salt || !hash || !expected.username) return false;
-  const derived = await derive(password, Buffer.from(salt, "hex"), Number(iterations), 32, "sha256");
+  if (!expected.username) return false;
   // Both checks always run, so timing does not reveal whether the username exists.
-  const passwordMatches = safeEqual(derived.toString("hex"), hash);
+  const passwordMatches = await verifyPassword(password, expected.passwordHash);
   return safeEqual(username, expected.username) && passwordMatches;
 }
 
@@ -70,23 +82,24 @@ function clientKey(request: NextRequest): string {
   return createHash("sha256").update(address).digest("hex");
 }
 
-export async function isThrottled(request: NextRequest): Promise<boolean> {
+// Each login keeps its own file: a candidate signing in must not reset the admin login's failure count.
+export async function isThrottled(request: NextRequest, file: string = ATTEMPTS_FILE): Promise<boolean> {
   const client = clientKey(request);
   const cutoff = Date.now() - WINDOW_MS;
-  const attempts = await readRecords<Attempt>(ATTEMPTS_FILE);
+  const attempts = await readRecords<Attempt>(file);
   return attempts.filter((a) => a.client === client && a.at > cutoff).length >= MAX_FAILURES;
 }
 
-export async function recordLoginFailure(request: NextRequest): Promise<void> {
+export async function recordLoginFailure(request: NextRequest, file: string = ATTEMPTS_FILE): Promise<void> {
   const client = clientKey(request);
   const cutoff = Date.now() - WINDOW_MS;
-  await updateRecords<Attempt>(ATTEMPTS_FILE, (attempts) => [
+  await updateRecords<Attempt>(file, (attempts) => [
     ...attempts.filter((a) => a.at > cutoff),
     { client, at: Date.now() },
   ]);
 }
 
-export async function clearLoginFailures(request: NextRequest): Promise<void> {
+export async function clearLoginFailures(request: NextRequest, file: string = ATTEMPTS_FILE): Promise<void> {
   const client = clientKey(request);
-  await updateRecords<Attempt>(ATTEMPTS_FILE, (attempts) => attempts.filter((a) => a.client !== client));
+  await updateRecords<Attempt>(file, (attempts) => attempts.filter((a) => a.client !== client));
 }

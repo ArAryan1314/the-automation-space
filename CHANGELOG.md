@@ -4,6 +4,23 @@ All notable changes and architectural updates across the repository are document
 
 ---
 
+## [4.7.0] - 2026-10-31
+
+### Added
+- Candidate accounts with super admin approval. `/candidate-login` now has real sign-in and an account request form. New accounts
+  are pending, and only approved accounts get a session. API routes: `/api/candidate-session` and `/api/candidates`.
+- A "Pending candidates" tab in the console to approve, reject, revoke or delete accounts. Stored in `candidates.json`.
+
+### Changed
+- `/candidate-login` no longer accepts any credentials. Its dashboard shows the candidate's own applications instead of the
+  hard-coded "Elena Rostova" sample profile and pipeline.
+- The admin console is now labelled "Super Admin Console" and signs in with an email address. There is still one login, with no
+  separate roles.
+- `lib/server/auth.ts`: login throttling takes a file name, so candidate sign-ins cannot reset the admin login's failure count.
+
+### Fixed
+- `lib/server/store.ts` no longer makes Turbopack trace the whole project, which copied `.data/` into the deployment bundle.
+
 ## [4.6.0] - 2026-10-31
 
 ### Added

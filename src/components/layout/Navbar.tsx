@@ -268,7 +268,7 @@ export default function Navbar() {
             <Link href="/admin-login">
               <Button variant="default" size="sm">
                 <Lock className="h-4 w-4" />
-                <span>Admin Console</span>
+                <span>Super Admin Console</span>
               </Button>
             </Link>
           </div>
@@ -370,7 +370,7 @@ export default function Navbar() {
             </Link>
             <Link href="/admin-login" onClick={() => setMobileOpen(false)}>
               <Button variant="default" className="w-full">
-                Admin Console
+                Super Admin Console
               </Button>
             </Link>
           </div>
@@ -427,7 +427,7 @@ function MenuSpotlight({ menuKey, onNavigate }: { menuKey: MenuKey; onNavigate: 
             </Link>
             <Link href="/admin-login" onClick={onNavigate} className="block">
               <Button variant="default" size="sm" className="w-full justify-between">
-                <span>Admin Console</span>
+                <span>Super Admin Console</span>
                 <Lock className="h-4 w-4" />
               </Button>
             </Link>

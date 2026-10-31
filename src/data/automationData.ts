@@ -143,7 +143,7 @@ export const AUTOMATION_STUDIO_FAQS = [
   },
   {
     q: "How do you protect candidate confidentiality and employer privacy?",
-    a: "We enforce a strict zero-blind-resume policy. We never submit a candidate's profile to any company without a mutual briefing and explicit authorization. Candidates log in via their private Candidate Portal (/candidate-login), while agency admins manage client flow through the secure Admin Console (/admin-login).",
+    a: "We enforce a strict zero-blind-resume policy. We never submit a candidate's profile to any company without a mutual briefing and explicit authorization. Candidates log in via their private Candidate Portal (/candidate-login) once a super admin approves their account, while the super admin manages client flow through the secure Super Admin Console (/admin-login).",
   },
   {
     q: "Where is candidate and requisition data hosted and secured?",

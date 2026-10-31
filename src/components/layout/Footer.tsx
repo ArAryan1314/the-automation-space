@@ -31,7 +31,7 @@ const FOOTER_COLUMNS = [
       { href: "/team", label: "Executive Partners" },
       { href: "/case-studies", label: "Placement Case Studies" },
       { href: "/documentation", label: "Layman Guide & Manual" },
-      { href: "/admin-login", label: "Admin Console" },
+      { href: "/admin-login", label: "Super Admin Console" },
       { href: "/portal", label: "Live State Telemetry" },
     ],
   },

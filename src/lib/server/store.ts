@@ -2,15 +2,21 @@ import { promises as fs } from "fs";
 import path from "path";
 import { randomBytes } from "crypto";
 
-/** JSON files outside the public folder. */
+/**
+ * JSON files outside the public folder. The ignore comments stop Turbopack tracing the
+ * whole project, which would copy stored personal data into the deployment bundle.
+ */
 function filePath(file: string): string {
-  return path.join(process.env.DATA_DIR?.trim() || path.join(process.cwd(), ".data"), file);
+  return path.join(
+    /*turbopackIgnore: true*/ process.env.DATA_DIR?.trim() || path.join(/*turbopackIgnore: true*/ process.cwd(), ".data"),
+    file
+  );
 }
 
 /** The file's records, or null when the file has never been written. */
 export async function readExisting<T>(file: string): Promise<T[] | null> {
   try {
-    return JSON.parse(await fs.readFile(filePath(file), "utf8")) as T[];
+    return JSON.parse(await fs.readFile(/*turbopackIgnore: true*/ filePath(file), "utf8")) as T[];
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code === "ENOENT") return null;
     throw error;

@@ -132,7 +132,7 @@ export function DocumentationView() {
                   <div className="py-6 last:pb-0 space-y-2">
                     <h2 className="text-base font-bold text-foreground">4. Why are the Candidate and Admin portals separate?</h2>
                     <p className="text-[15px] text-body leading-relaxed max-w-prose">
-                      Candidates have their own private area (<code className="rounded-md bg-surface border border-border px-1.5 py-0.5 font-mono text-[13px] text-foreground">/candidate-login</code>) to check their interview progress and view salary guides. Agency directors have a protected control room (<code className="rounded-md bg-surface border border-border px-1.5 py-0.5 font-mono text-[13px] text-foreground">/admin-login</code>) to inspect all live data without mixing client and applicant records.
+                      Candidates have their own private area (<code className="rounded-md bg-surface border border-border px-1.5 py-0.5 font-mono text-[13px] text-foreground">/candidate-login</code>) to follow their job applications once a super admin approves their account. The super admin has a protected control room (<code className="rounded-md bg-surface border border-border px-1.5 py-0.5 font-mono text-[13px] text-foreground">/admin-login</code>) to inspect all live data without mixing client and applicant records.
                     </p>
                   </div>
                 </div>
@@ -198,17 +198,17 @@ export function DocumentationView() {
                       <span>Candidate Portal (/candidate-login)</span>
                     </h2>
                     <p className="text-[15px] text-body leading-relaxed max-w-prose">
-                      Job seekers log in securely to monitor the status of their active applications (Intake Received, Partner Evaluated, Partner Review, Client Onsite) and review 2026 salary benchmarks. Candidates can never see other applicants&apos; profiles or internal agency notes.
+                      Job seekers request an account and can sign in only after a super admin approves it. They then see the jobs they applied for with the same email address. Candidates can never see other applicants&apos; profiles or internal agency notes.
                     </p>
                   </div>
 
                   <div className="rounded-xl border border-border bg-surface p-5 sm:p-6 space-y-2">
                     <h2 className="text-base font-bold text-foreground flex items-center gap-2.5">
                       <span className="h-2 w-2 rounded-full bg-accent" />
-                      <span>Admin Operations Console (/admin-login)</span>
+                      <span>Super Admin Console (/admin-login)</span>
                     </h2>
                     <p className="text-[15px] text-body leading-relaxed max-w-prose">
-                      Protected with an admin username and password. Admins add, edit and delete the job postings shown on the public jobs page, and review contacts, job applications and intake submissions.
+                      Protected with a super admin email and password. The super admin approves or rejects candidate accounts, adds, edits and deletes the job postings shown on the public jobs page, and reviews contacts, job applications and intake submissions.
                     </p>
                   </div>
                 </div>

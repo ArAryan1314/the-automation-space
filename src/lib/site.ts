@@ -103,13 +103,13 @@ export const SITE_PAGES = {
   candidateLogin: {
     path: "/candidate-login",
     title: "Candidate Portal",
-    description: "Candidate sign-in and pipeline dashboard showing interview stage and next steps (demo login).",
+    description: "Candidate account requests and sign-in. Accounts need super admin approval, then show the candidate's job applications.",
     group: "Portals",
   },
   adminLogin: {
     path: "/admin-login",
-    title: "Admin Console",
-    description: "Password-protected console to manage job postings and review contacts, job applications and intake submissions.",
+    title: "Super Admin Console",
+    description: "Password-protected console to approve candidate accounts, manage job postings and review contacts, job applications and intake submissions.",
     group: "Portals",
   },
   portal: {

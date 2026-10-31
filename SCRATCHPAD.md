@@ -41,7 +41,7 @@ Each page exports `metadata = pageMetadata(key)`; the key is its entry in `SITE_
 
 ## Data Persistence & Hosting Architecture
 1. **JSON files, no database**:
-   - `jobs.json`, `contacts.json`, `applications.json`, `submissions.json`, `login-attempts.json`.
+   - `jobs.json`, `contacts.json`, `applications.json`, `submissions.json`, `candidates.json`, `login-attempts.json`, `candidate-login-attempts.json`, `candidate-register-attempts.json`.
    - Saved to `.data/` or `DATA_DIR` (`src/lib/server/store.ts`).
    - `jobs.json` is seeded once from `src/data/seed-jobs.json`. A file that already exists is never reseeded, so deleted jobs stay deleted.
 2. **Security & Confidentiality Protocol**:
@@ -49,4 +49,5 @@ Each page exports `metadata = pageMetadata(key)`; the key is its entry in `SITE_
    - Zero third-party candidate profile disclosures without written authorization.
    - Dual portal isolation: Candidate self-service cannot inspect administrative candidate queues or internal fee metrics.
 3. **Admin auth**: `/admin-login` is enforced on the server with a signed HttpOnly cookie. Reading contacts, applications and intakes, and changing jobs, all require it.
-4. **Known limitations**: `/candidate-login` is still a front-end demo (any credentials accepted). The public contact, apply and intake forms have no spam protection beyond field validation. The admin has one shared login, with no per-user accounts or audit log.
+4. **Candidate auth**: `/candidate-login` accounts live in `candidates.json` with a PBKDF2 hash and start as `pending`. Only `approved` accounts get a session, and status is re-read on every request (`src/lib/server/candidates.ts`).
+5. **Known limitations**: No emails are sent, so the super admin must check the console for new requests and candidates are not told of a decision. There is no candidate password reset. Applications match an account by email without proving the application's sender owned it. The public contact, apply and intake forms have no spam protection beyond field validation. The super admin has one shared login, with no per-user accounts or audit log.

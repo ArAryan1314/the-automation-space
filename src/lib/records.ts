@@ -22,6 +22,17 @@ export interface ContactRecord {
   aiDraft: string;
 }
 
+export type CandidateStatus = "pending" | "approved" | "rejected";
+
+export interface CandidateAccountRecord {
+  id: string;
+  timestamp: string;
+  name: string;
+  email: string;
+  status: CandidateStatus;
+  reviewedAt: string | null;
+}
+
 export interface ApplicationRecord {
   id: string;
   timestamp: string;

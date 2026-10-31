@@ -14,6 +14,7 @@ import {
   LogOut,
   RefreshCw,
   ShieldCheck,
+  UserCheck,
 } from "lucide-react";
 import {
   Badge,
@@ -32,8 +33,9 @@ import {
   Text,
 } from "@/components/ui";
 import type { JobListing } from "@/data/agencyData";
-import type { ApplicationRecord, ContactRecord, SubmissionRecord } from "@/lib/records";
+import type { ApplicationRecord, CandidateAccountRecord, ContactRecord, SubmissionRecord } from "@/lib/records";
 import { ApplicationsPanel } from "./admin/ApplicationsPanel";
+import { CandidatesPanel } from "./admin/CandidatesPanel";
 import { ContactsPanel } from "./admin/ContactsPanel";
 import { JobsPanel } from "./admin/JobsPanel";
 import { SubmissionsPanel } from "./admin/SubmissionsPanel";
@@ -49,9 +51,10 @@ interface ConsoleData {
   contacts: ContactRecord[];
   applications: ApplicationRecord[];
   submissions: SubmissionRecord[];
+  candidates: CandidateAccountRecord[];
 }
 
-type TabKey = "jobs" | "contacts" | "applications" | "submissions";
+type TabKey = "jobs" | "candidates" | "contacts" | "applications" | "submissions";
 
 function loadConsoleData(): Promise<ConsoleData> {
   return Promise.all([
@@ -59,7 +62,14 @@ function loadConsoleData(): Promise<ConsoleData> {
     callApi<ContactRecord[]>("/api/contacts"),
     callApi<ApplicationRecord[]>("/api/applications"),
     callApi<SubmissionRecord[]>("/api/ai-respond"),
-  ]).then(([jobs, contacts, applications, submissions]) => ({ jobs, contacts, applications, submissions }));
+    callApi<CandidateAccountRecord[]>("/api/candidates"),
+  ]).then(([jobs, contacts, applications, submissions, candidates]) => ({
+    jobs,
+    contacts,
+    applications,
+    submissions,
+    candidates,
+  }));
 }
 
 export function AdminLoginView() {
@@ -140,13 +150,13 @@ function LoginForm({ notice, onSignedIn }: { notice: string; onSignedIn: (sessio
         <div className="text-center space-y-4">
           <Badge variant="destructive" className="py-1 px-3">
             <Lock className="h-3.5 w-3.5" />
-            <span>Restricted Admin Portal</span>
+            <span>Restricted Super Admin Portal</span>
           </Badge>
           <Heading as="h1" size="h2">
-            Admin Operations Console
+            Super Admin Console
           </Heading>
           <Text size="sm" variant="muted" className="max-w-sm mx-auto">
-            Authorized personnel only. Manage job postings and review contacts, applications and intakes.
+            Authorized personnel only. Approve candidate accounts, manage job postings and review contacts, applications and intakes.
           </Text>
         </div>
 
@@ -156,17 +166,17 @@ function LoginForm({ notice, onSignedIn }: { notice: string; onSignedIn: (sessio
               <KeyRound />
             </IconBox>
             <div className="space-y-1">
-              <CardTitle>Admin sign in</CardTitle>
-              <CardDescription>Enter your admin username and password.</CardDescription>
+              <CardTitle>Super admin sign in</CardTitle>
+              <CardDescription>Enter your super admin email and password.</CardDescription>
             </div>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <Label htmlFor="admin-username">Username</Label>
+              <Label htmlFor="admin-username">Email</Label>
               <Input
                 id="admin-username"
-                type="text"
+                type="email"
                 required
                 autoComplete="username"
                 value={username}
@@ -273,6 +283,12 @@ function AdminConsole({
 
   const tabs: { key: TabKey; label: string; count: number; icon: React.ReactNode }[] = [
     { key: "jobs", label: "Job postings", count: data?.jobs.length ?? 0, icon: <Briefcase className="h-4 w-4" /> },
+    {
+      key: "candidates",
+      label: "Pending candidates",
+      count: data?.candidates.filter((candidate) => candidate.status === "pending").length ?? 0,
+      icon: <UserCheck className="h-4 w-4" />,
+    },
     { key: "contacts", label: "Contacts", count: data?.contacts.length ?? 0, icon: <Contact className="h-4 w-4" /> },
     { key: "applications", label: "Applications", count: data?.applications.length ?? 0, icon: <FileUser className="h-4 w-4" /> },
     { key: "submissions", label: "Intakes", count: data?.submissions.length ?? 0, icon: <Inbox className="h-4 w-4" /> },
@@ -288,10 +304,10 @@ function AdminConsole({
               Signed in as {username}
             </Badge>
             <Heading as="h1" size="h3">
-              Admin Operations Console
+              Super Admin Console
             </Heading>
             <Text size="sm" variant="muted">
-              Manage job postings and review what visitors send you.
+              Approve candidate accounts, manage job postings and review what visitors send you.
             </Text>
           </div>
 
@@ -313,7 +329,7 @@ function AdminConsole({
         </div>
 
         <StatsGrid
-          columns={4}
+          columns={5}
           stats={tabs.map((item, index) => ({
             label: item.label,
             value: item.count,
@@ -346,6 +362,9 @@ function AdminConsole({
         ) : (
           <>
             {tab === "jobs" && <JobsPanel jobs={data.jobs} onChanged={refresh} onSessionExpired={onSessionExpired} />}
+            {tab === "candidates" && (
+              <CandidatesPanel candidates={data.candidates} onChanged={refresh} onSessionExpired={onSessionExpired} />
+            )}
             {tab === "contacts" && (
               <ContactsPanel contacts={data.contacts} onChanged={refresh} onSessionExpired={onSessionExpired} />
             )}

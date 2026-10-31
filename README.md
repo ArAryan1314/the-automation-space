@@ -69,18 +69,21 @@ canonical URL. The same list is shown in the **Site Pages** tab of `/documentati
 | `/process` | `ProcessView` | 6-stage vetting process, 90-day guarantee |
 | `/faq` | `FAQView` | Frequently asked questions |
 | `/documentation` | `DocumentationView` | User manual, page directory, architecture, developer setup |
-| `/candidate-login` | `CandidateLoginView` | Candidate portal (demo login) |
-| `/admin-login` | `AdminLoginView` | Admin console: job postings, contacts, applications and intakes |
+| `/candidate-login` | `CandidateLoginView` | Candidate account requests and sign-in; needs super admin approval, then shows the candidate's applications |
+| `/admin-login` | `AdminLoginView` | Super admin console: candidate approvals, job postings, contacts, applications and intakes |
 | `/portal` | `PortalView` | Developer intake form; its list only fills in when signed in as admin |
 | `/api/admin-session` | route handler | `GET` session status; `POST` with `action` `login` or `logout` |
+| `/api/candidate-session` | route handler | `GET` the signed-in candidate and their applications; `POST` with `action` `register`, `login` or `logout` |
+| `/api/candidates` | route handler | Needs an admin. `GET` lists accounts; `POST` with `action` `approve`, `reject` or `delete` |
 | `/api/jobs` | route handler | `GET` is public; `POST` with `action` `create`, `update` or `delete` needs an admin |
 | `/api/contacts` | route handler | `POST` without `action` is the contact form; `GET` and `action` `create` or `delete` need an admin |
 | `/api/applications` | route handler | `POST` without `action` is Quick Apply; `GET` and `action` `delete` need an admin |
 | `/api/ai-respond` | route handler | `POST` validates and stores an intake; `GET` lists stored intakes and needs an admin |
 
-> Create the admin login with `pnpm admin:create [username] [password]`. Without a password, a strong one is generated
+> Create the super admin login with `pnpm admin:create [email] [password]`. Without a password, a strong one is generated
 > and printed once. Data is saved as JSON files in `.data/` (or `DATA_DIR`).
-> The candidate login is still a front-end demo: any credentials are accepted.
+> Candidate accounts start as pending and cannot sign in until approved in the console's Pending candidates tab.
+> Rejecting or deleting an account ends its session on the next request. No emails are sent, so check that tab for new requests.
 
 ## Project structure
 

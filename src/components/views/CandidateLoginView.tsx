@@ -1,222 +1,331 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
-  Users,
-  Lock,
-  Mail,
   ArrowRight,
   Briefcase,
-  LogOut,
-  Check,
-  CircleDot,
-  Circle,
-  ShieldCheck,
-  MessageSquareQuote,
-  MapPin,
   CalendarClock,
-  Layers,
+  Clock,
+  Loader2,
+  Lock,
+  LogOut,
+  Mail,
+  ShieldCheck,
+  User,
+  UserPlus,
+  Users,
 } from "lucide-react";
 import {
-  Section,
-  Heading,
-  Text,
+  AlertBanner,
   Badge,
-  Card,
-  CardTitle,
-  CardDescription,
   Button,
+  Card,
+  CardDescription,
+  CardTitle,
+  Heading,
+  IconBox,
   Input,
   Label,
-  IconBox,
+  Section,
   StatsGrid,
+  TabsList,
+  TabsTrigger,
+  Text,
 } from "@/components/ui";
+import { callApi } from "@/lib/api";
+import type { CandidateAccountRecord } from "@/lib/records";
+
+interface PortalSession {
+  authenticated: boolean;
+  account: CandidateAccountRecord | null;
+  applications: { id: string; timestamp: string; jobTitle: string }[];
+}
+
+const SIGNED_OUT: PortalSession = { authenticated: false, account: null, applications: [] };
 
 export function CandidateLoginView() {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [email, setEmail] = useState("elena.rostova@techcorp.io");
-  const [password, setPassword] = useState("••••••••");
+  const [session, setSession] = useState<PortalSession | null>(null);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const loadSession = useCallback(
+    () => callApi<PortalSession>("/api/candidate-session").catch(() => SIGNED_OUT).then(setSession),
+    []
+  );
+
+  useEffect(() => {
+    let active = true;
+    callApi<PortalSession>("/api/candidate-session")
+      .catch(() => SIGNED_OUT)
+      .then((result) => {
+        if (active) setSession(result);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  if (!session) {
+    return (
+      <Section variant="hero" spacing="lg" className="border-b border-border">
+        <div className="flex justify-center text-muted-foreground" role="status" aria-label="Loading">
+          <Loader2 className="h-6 w-6 animate-spin" />
+        </div>
+      </Section>
+    );
+  }
+
+  if (!session.account) return <AccessForms onSignedIn={loadSession} />;
+
+  return <Dashboard account={session.account} applications={session.applications} onSignedOut={() => setSession(SIGNED_OUT)} />;
+}
+
+function AccessForms({ onSignedIn }: { onSignedIn: () => Promise<void> }) {
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+
+  const switchMode = (next: "login" | "register") => {
+    setMode(next);
+    setError("");
+    setNotice("");
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoggedIn(true);
+    setError("");
+    setNotice("");
+    setSubmitting(true);
+    try {
+      if (mode === "register") {
+        await callApi("/api/candidate-session", { action: "register", name, email, password });
+        setPassword("");
+        setMode("login");
+        setNotice("Request received. You can sign in once a super admin approves your account.");
+      } else {
+        await callApi("/api/candidate-session", { action: "login", email, password });
+        await onSignedIn();
+      }
+    } catch (err) {
+      setPassword("");
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
-    <div>
-      {!isLoggedIn ? (
-        /* Login Card */
-        <Section variant="hero" spacing="lg" className="border-b border-border">
-          <div className="max-w-md mx-auto space-y-8 animate-fade-up">
-            <div className="text-center space-y-4">
-              <Badge variant="default" className="py-1 px-3">
-                <Users className="h-3.5 w-3.5" />
-                <span>Candidate Self-Service Gateway</span>
-              </Badge>
-              <Heading as="h1" size="h2">
-                Candidate Portal & Career Tracker
+    <Section variant="hero" spacing="lg" className="border-b border-border">
+      <div className="max-w-md mx-auto space-y-8 animate-fade-up">
+        <div className="text-center space-y-4">
+          <Badge variant="default" className="py-1 px-3">
+            <Users className="h-3.5 w-3.5" />
+            <span>Candidate Portal</span>
+          </Badge>
+          <Heading as="h1" size="h2">
+            Candidate Portal & Career Tracker
+          </Heading>
+          <Text size="sm" variant="muted" className="max-w-sm mx-auto">
+            Request an account and sign in once a super admin approves it, then follow your job applications in one place.
+          </Text>
+        </div>
+
+        <Card className="p-8 space-y-6 shadow-lift hover:shadow-lift">
+          <TabsList>
+            <TabsTrigger active={mode === "login"} onClick={() => switchMode("login")}>
+              <Lock className="h-4 w-4" />
+              Sign in
+            </TabsTrigger>
+            <TabsTrigger active={mode === "register"} onClick={() => switchMode("register")}>
+              <UserPlus className="h-4 w-4" />
+              Request access
+            </TabsTrigger>
+          </TabsList>
+
+          <div className="space-y-1">
+            <CardTitle>{mode === "login" ? "Sign in to your account" : "Request a candidate account"}</CardTitle>
+            <CardDescription>
+              {mode === "login"
+                ? "Enter the email and password you registered with."
+                : "A super admin reviews each request before the account can sign in."}
+            </CardDescription>
+          </div>
+
+          {notice && <AlertBanner variant="success">{notice}</AlertBanner>}
+
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {mode === "register" && (
+              <div>
+                <Label htmlFor="candidate-name">Full name</Label>
+                <div className="relative">
+                  <User className="absolute left-3.5 top-3.5 h-4 w-4 text-subtle-foreground" />
+                  <Input
+                    id="candidate-name"
+                    required
+                    minLength={2}
+                    autoComplete="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+            )}
+
+            <div>
+              <Label htmlFor="candidate-email">Email address</Label>
+              <div className="relative">
+                <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-subtle-foreground" />
+                <Input
+                  id="candidate-email"
+                  type="email"
+                  required
+                  autoComplete="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+
+            <div>
+              <Label htmlFor="candidate-password">Password</Label>
+              <div className="relative">
+                <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-subtle-foreground" />
+                <Input
+                  id="candidate-password"
+                  type="password"
+                  required
+                  minLength={mode === "register" ? 12 : undefined}
+                  autoComplete={mode === "register" ? "new-password" : "current-password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              {mode === "register" && (
+                <p className="mt-1.5 text-xs text-muted-foreground">Use at least 12 characters.</p>
+              )}
+            </div>
+
+            {error && (
+              <p role="alert" className="text-sm text-red-300">
+                {error}
+              </p>
+            )}
+
+            <Button type="submit" size="lg" disabled={submitting} className="w-full">
+              {submitting ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <>
+                  <span>{mode === "login" ? "Sign in" : "Send request"}</span>
+                  <ArrowRight className="h-4 w-4" />
+                </>
+              )}
+            </Button>
+          </form>
+
+          <div className="border-t border-border pt-5 space-y-3 text-sm text-muted-foreground">
+            <div className="flex items-center justify-center gap-2 text-xs">
+              <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
+              <span>Only approved accounts can sign in.</span>
+            </div>
+            <div className="text-center">
+              Looking for agency administration?{" "}
+              <Link href="/admin-login" className="text-primary hover:text-primary-hover font-semibold">
+                Go to Super Admin Console
+              </Link>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </Section>
+  );
+}
+
+function Dashboard({
+  account,
+  applications,
+  onSignedOut,
+}: {
+  account: CandidateAccountRecord;
+  applications: PortalSession["applications"];
+  onSignedOut: () => void;
+}) {
+  const signOut = async () => {
+    await callApi("/api/candidate-session", { action: "logout" }).catch(() => undefined);
+    onSignedOut();
+  };
+
+  const formatDate = (iso: string) => new Date(iso).toLocaleDateString(undefined, { dateStyle: "medium" });
+
+  return (
+    <Section spacing="sm">
+      <div className="space-y-8 animate-fade-up">
+        <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-border">
+          <div className="flex items-center gap-4 min-w-0">
+            <IconBox tone="primary" size="lg">
+              <Users />
+            </IconBox>
+            <div className="space-y-1 min-w-0">
+              <Badge variant="success">Approved account</Badge>
+              <Heading as="h1" size="h3">
+                Welcome, {account.name}
               </Heading>
-              <Text size="sm" variant="muted" className="max-w-sm mx-auto">
-                Check your active interview pipeline status, review technical screening milestones, and access 2026 tech compensation benchmarks.
+              <Text size="sm" variant="muted" className="break-all">
+                {account.email}
               </Text>
             </div>
-
-            <Card className="p-8 space-y-6 shadow-lift hover:shadow-lift">
-              <div className="space-y-1">
-                <CardTitle>Log In to Candidate Workspace</CardTitle>
-                <CardDescription>
-                  Enter your credentials or click below to simulate instant one-click demo access.
-                </CardDescription>
-              </div>
-
-              <form onSubmit={handleLogin} className="space-y-5">
-                <div>
-                  <Label htmlFor="candidate-email">Registered email address</Label>
-                  <div className="relative">
-                    <Mail className="absolute left-3.5 top-3.5 h-4 w-4 text-subtle-foreground" />
-                    <Input
-                      id="candidate-email"
-                      type="email"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <Label htmlFor="candidate-password">Security password</Label>
-                  <div className="relative">
-                    <Lock className="absolute left-3.5 top-3.5 h-4 w-4 text-subtle-foreground" />
-                    <Input
-                      id="candidate-password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="pl-10"
-                    />
-                  </div>
-                </div>
-
-                <Button type="submit" size="lg" className="w-full">
-                  <span>Enter Candidate Portal (Simulated Demo)</span>
-                  <ArrowRight className="h-4 w-4" />
-                </Button>
-              </form>
-
-              <div className="border-t border-border pt-5 space-y-3 text-sm text-muted-foreground">
-                <div className="flex items-center justify-center gap-2 text-xs">
-                  <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
-                  <span>Protected by candidate privacy encryption.</span>
-                </div>
-                <div className="text-center">
-                  Looking for agency administration?{" "}
-                  <Link href="/admin-login" className="text-primary hover:text-primary-hover font-semibold">
-                    Go to Admin Console
-                  </Link>
-                </div>
-              </div>
-            </Card>
           </div>
-        </Section>
-      ) : (
-        /* Dashboard View */
-        <Section spacing="sm">
-          <div className="space-y-8 animate-fade-up">
-            <div className="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-border">
-              <div className="flex items-center gap-4">
-                <IconBox tone="primary" size="lg">
-                  <Users />
-                </IconBox>
-                <div className="space-y-1">
-                  <Badge variant="success">Active Candidate Profile</Badge>
-                  <Heading as="h1" size="h3">
-                    Welcome, Elena Rostova
-                  </Heading>
-                  <Text size="sm" variant="muted">
-                    {email} · Senior Lead Cloud Architect
-                  </Text>
-                </div>
-              </div>
 
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => setIsLoggedIn(false)}
-              >
-                <LogOut className="h-3.5 w-3.5" />
-                <span>Log Out</span>
-              </Button>
+          <Button variant="secondary" size="sm" onClick={signOut}>
+            <LogOut className="h-3.5 w-3.5" />
+            <span>Log Out</span>
+          </Button>
+        </div>
+
+        <StatsGrid
+          columns={2}
+          stats={[
+            { label: "Job applications", value: applications.length, icon: <Briefcase className="h-4 w-4" />, highlight: true },
+            {
+              label: "Member since",
+              value: formatDate(account.timestamp),
+              icon: <CalendarClock className="h-4 w-4" />,
+            },
+          ]}
+        />
+
+        <div className="space-y-4">
+          <h2 className="text-base font-bold text-foreground flex items-center gap-2">
+            <Briefcase className="h-4 w-4 text-primary" />
+            <span>Your applications</span>
+          </h2>
+
+          {applications.length === 0 ? (
+            <div className="text-center text-sm text-muted-foreground py-12 px-6 bg-card border border-dashed border-border-strong rounded-2xl space-y-3">
+              <p>No applications under this email yet.</p>
+              <Link href="/jobs" className="text-primary hover:text-primary-hover font-semibold">
+                Browse open roles
+              </Link>
             </div>
-
-            <StatsGrid
-              columns={3}
-              stats={[
-                { label: "Active representations", value: 1, icon: <Briefcase className="h-4 w-4" /> },
-                { label: "Current stage", value: "Stage 4", icon: <Layers className="h-4 w-4" />, highlight: true },
-                { label: "Next briefing", value: "Tue 2:00 PM", icon: <CalendarClock className="h-4 w-4" /> },
-              ]}
-            />
-
-            {/* Application Pipeline Status */}
-            <div className="space-y-4">
-              <h2 className="text-base font-bold text-foreground flex items-center gap-2">
-                <Briefcase className="h-4 w-4 text-primary" />
-                <span>Active Representation & Sourcing Status</span>
-              </h2>
-
-              <Card className="p-6 space-y-5">
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <h3 className="font-bold text-foreground text-base">
-                      VP of Artificial Intelligence & LLM Systems
-                    </h3>
-                    <p className="text-sm text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                      <MapPin className="h-3.5 w-3.5 text-subtle-foreground" />
-                      San Francisco, CA · $320k - $420k + Equity
-                    </p>
-                  </div>
-                  <Badge variant="warning">
-                    Stage 4: Partner Calibrated
-                  </Badge>
-                </div>
-
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-sm font-medium">
-                  <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
-                    <Check className="h-4 w-4" />
-                    Intake Received
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-300">
-                    <Check className="h-4 w-4" />
-                    Partner Evaluated
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-primary-soft border border-primary/30 text-primary-hover font-semibold">
-                    <CircleDot className="h-4 w-4" />
-                    Partner Review
-                  </div>
-                  <div className="flex items-center justify-center gap-1.5 p-2.5 rounded-xl bg-surface border border-border text-subtle-foreground">
-                    <Circle className="h-4 w-4" />
-                    Client Onsite
-                  </div>
-                </div>
-
-                <div className="p-4 rounded-xl bg-surface border border-border text-sm text-body space-y-1.5">
-                  <span className="font-semibold text-primary-hover flex items-center gap-1.5 text-xs">
-                    <MessageSquareQuote className="h-3.5 w-3.5" />
-                    Assigned Technical Partner Advisory Note:
-                  </span>
-                  <p className="leading-relaxed">
-                    &ldquo;Elena&rsquo;s background in distributed Kubernetes architectures and Golang clusters matches the client&rsquo;s core infrastructure requirements. We have scheduled an exploratory briefing with the CTO for Tuesday at 2:00 PM PST.&rdquo;
-                  </p>
-                </div>
+          ) : (
+            applications.map((application) => (
+              <Card key={application.id} className="p-6 flex flex-wrap items-center justify-between gap-3">
+                <CardTitle>{application.jobTitle}</CardTitle>
+                <span className="text-xs text-subtle-foreground flex items-center">
+                  <Clock className="h-3.5 w-3.5 mr-1" />
+                  Applied {formatDate(application.timestamp)}
+                </span>
               </Card>
-            </div>
-          </div>
-        </Section>
-      )}
-    </div>
+            ))
+          )}
+        </div>
+      </div>
+    </Section>
   );
 }
