@@ -28,7 +28,7 @@ import {
 } from "@/components/ui";
 
 const selectClass =
-  "flex h-11 w-full rounded-xl border border-input bg-card px-3.5 text-sm text-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10";
+  "flex h-11 w-full rounded-xl border border-input bg-surface px-3.5 text-sm text-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10";
 
 export function EmployersView() {
   const [formData, setFormData] = useState({
@@ -348,7 +348,7 @@ export function EmployersView() {
             </Text>
           </Card>
           <Card className="p-6 space-y-3">
-            <IconBox tone="amber">
+            <IconBox tone="energy">
               <Handshake />
             </IconBox>
             <div className="text-primary font-bold text-sm">04 / Offer Closing</div>

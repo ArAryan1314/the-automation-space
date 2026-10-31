@@ -165,7 +165,7 @@ export function PortalView() {
                     <Label htmlFor="portal-role">Classification</Label>
                     <select
                       id="portal-role"
-                      className="w-full h-11 rounded-xl border border-input bg-card px-3.5 text-sm text-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10"
+                      className="w-full h-11 rounded-xl border border-input bg-surface px-3.5 text-sm text-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10"
                       value={formData.roleType}
                       onChange={e => setFormData({...formData, roleType: e.target.value})}
                     >

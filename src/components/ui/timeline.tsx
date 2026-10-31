@@ -37,7 +37,7 @@ export function Timeline({
           key={idx}
           className="relative rounded-2xl border border-border bg-card p-5 pl-6 shadow-soft space-y-2 overflow-hidden"
         >
-          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-sky-400" />
+          <div className="absolute left-0 top-0 h-full w-1 bg-gradient-to-b from-primary to-accent" />
           {item.year && (
             <span className="inline-block rounded-full bg-primary-soft px-2.5 py-0.5 text-xs font-bold text-primary-hover">
               {item.year}

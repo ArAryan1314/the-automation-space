@@ -22,6 +22,7 @@ import {
   Label,
   IconBox,
 } from "@/components/ui";
+import { callApi } from "@/lib/api";
 
 const offices = [
   {
@@ -48,24 +49,18 @@ export function ContactView() {
   });
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError("");
     try {
-      await fetch("/api/ai-respond", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          roleType: formData.subject.includes("Retained") || formData.subject.includes("Corporate") ? "employer" : "candidate",
-          message: `[Direct Contact Form: ${formData.subject}] Phone: ${formData.phone || "N/A"}. Message: ${formData.message}`,
-        }),
-      });
+      await callApi("/api/contacts", formData);
+      setFormData({ ...formData, message: "" });
       setSubmitted(true);
     } catch (err) {
-      console.error(err);
+      setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -198,7 +193,7 @@ export function ContactView() {
                           id="contact-subject"
                           value={formData.subject}
                           onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
-                          className="h-11 w-full appearance-none rounded-xl border border-input bg-card pl-3.5 pr-10 text-sm text-foreground shadow-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10"
+                          className="h-11 w-full appearance-none rounded-xl border border-input bg-surface pl-3.5 pr-10 text-sm text-foreground shadow-sm transition-all cursor-pointer focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/10"
                         >
                           <option>Executive Retained Inquiry</option>
                           <option>Corporate Engineering Sourcing</option>
@@ -216,11 +211,14 @@ export function ContactView() {
                       id="contact-message"
                       rows={5}
                       required
+                      minLength={10}
                       placeholder="Tell us about the headcount you are looking to hire, or your executive background..."
                       value={formData.message}
                       onChange={(e) => setFormData({ ...formData, message: e.target.value })}
                     />
                   </div>
+
+                  {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
 
                   <Button
                     type="submit"

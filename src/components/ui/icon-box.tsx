@@ -10,8 +10,8 @@ const iconBoxVariants = cva(
       tone: {
         primary: "bg-primary-soft border-primary-muted text-primary",
         accent: "bg-accent-soft border-accent/30 text-accent",
-        sky: "bg-sky-500/10 border-sky-500/30 text-sky-400",
-        amber: "bg-amber-500/10 border-amber-500/30 text-amber-400",
+        sky: "bg-primary/10 border-primary/30 text-primary-hover",
+        energy: "bg-energy-soft border-energy/30 text-energy",
         rose: "bg-rose-500/10 border-rose-500/30 text-rose-400",
         neutral: "bg-surface border-border text-muted-foreground",
       },

@@ -81,7 +81,7 @@ export default function Footer() {
             {/* Brand Info */}
             <div className="col-span-2 space-y-4">
               <Link href="/" className="flex items-center gap-3">
-                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-sky-500 flex items-center justify-center shadow-md shadow-primary/20">
+                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md shadow-primary/20">
                   <Zap className="h-5 w-5 text-primary-foreground" />
                 </div>
                 <span className="font-extrabold text-lg text-foreground">The Automation Studio</span>

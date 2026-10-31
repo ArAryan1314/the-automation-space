@@ -72,7 +72,7 @@ const MENUS: Record<
         title: "C-Suite & Board Leadership",
         desc: "Confidential board-level retained search for Chief Technology Officers and VP of Engineering.",
         icon: <Building2 />,
-        tone: "amber",
+        tone: "energy",
       },
     ],
   },
@@ -107,7 +107,7 @@ const MENUS: Record<
         title: "2026 Tech Salary Guide",
         desc: "Comprehensive compensation tables across AI, Distributed Systems, Security, and C-Suite roles.",
         icon: <DollarSign />,
-        tone: "amber",
+        tone: "energy",
       },
     ],
   },
@@ -206,7 +206,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-18 py-3">
           {/* Logo with The Automation Studio Branding */}
           <Link href="/" className="flex items-center gap-3 group flex-shrink-0">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-sky-500 flex items-center justify-center shadow-md shadow-primary/25 group-hover:scale-105 transition-transform">
+            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-md shadow-primary/25 group-hover:scale-105 transition-transform">
               <Zap className="h-5 w-5 text-primary-foreground" />
             </div>
             <div className="leading-tight">

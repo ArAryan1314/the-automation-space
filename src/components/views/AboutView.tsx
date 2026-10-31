@@ -44,7 +44,7 @@ export function AboutView() {
     },
     {
       icon: <Award />,
-      tone: "amber" as const,
+      tone: "energy" as const,
       title: "Retention Over Speed",
       desc: "We measure our success by candidate tenure and post-placement impact, not how many invoices we process in a single quarter.",
     },

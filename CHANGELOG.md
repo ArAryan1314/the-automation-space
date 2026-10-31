@@ -4,6 +4,55 @@ All notable changes and architectural updates across the repository are document
 
 ---
 
+## [4.6.0] - 2026-10-31
+
+### Added
+- GitHub sync: `pnpm sync` commits and pushes to `ArAryan1314/the-automation-space`, and `pnpm sync:install` schedules it
+  every 15 minutes on Windows. It stops without committing if a private file or secret would be included.
+- GitHub Actions CI (`.github/workflows/ci.yml`): builds the Linux deployment bundle, runs typecheck and lint, starts the
+  bundle, requests key routes, and keeps the bundle as a downloadable artifact for 14 days.
+- `.gitattributes`, so text files are stored in git with LF line endings.
+
+### Changed
+- `.gitignore` now excludes `godaddy-dist/` and `godaddy-deployment.zip`, which contain a copy of `.env.local`.
+
+## [4.5.0] - 2026-10-31
+
+### Removed
+- PHP hosting: the `godaddy-php/` upload folder and PHP API, `godaddy-php.zip`, `scripts/package-php.js`, `pnpm build:php`
+  and the `STATIC_EXPORT` static-export mode in `next.config.ts`. The site now needs a Node.js host; `pnpm admin:create`
+  writes to `.env.local` only.
+
+## [4.4.0] - 2026-10-31
+
+### Added
+- Admin login with a username and password, replacing the passkey. `pnpm admin:create [username] [password]` saves a
+  PBKDF2 hash to `.env.local` and `godaddy-php/api/credentials.php`. Sessions are signed HttpOnly cookies lasting 8 hours;
+  10 failed sign-ins from one address block further attempts for 15 minutes.
+- `/admin-login` console tabs: job postings (add, edit, delete), contacts (view, add, delete), job applications
+  (view, delete) and intakes (view).
+- API routes `/api/admin-session`, `/api/jobs`, `/api/contacts`, `/api/applications` in both Node (`src/app/api`,
+  `src/lib/server`) and PHP (`godaddy-php/api`). Changes use POST with an `action`, because shared hosts often block PUT and DELETE.
+
+### Changed
+- `/jobs` loads postings from the API. The hard-coded list moved to `src/data/seed-jobs.json`, written to `jobs.json` once
+  on first use. Job departments in the filter now come from the stored postings.
+- Quick Apply now saves the application and asks for a name; before, it showed a success message and discarded the data.
+- The contact form saves to `/api/contacts` with phone and inquiry type as separate fields, and shows an error when sending fails.
+- Node: intakes are saved to a file instead of memory (`.data/`, or `DATA_DIR`), and `GET /api/ai-respond` requires a signed-in admin.
+- `pnpm build:php` stops if `api/credentials.php` is missing, and no longer generates `admin_key`, which is now unused.
+
+## [4.3.0] - 2026-10-31
+
+### Changed
+- Theme palette replaced: space-void canvas `#040810`, cyber-navy cards `#0A1322`, electric-cyan primary `#00F0FF`,
+  royal-blue accent `#0066FF` and new energy-orange tokens (`energy`, `energy-soft`). New `accent-hover` and
+  `shadow-neon-cyan` / `-blue` / `-orange` tokens. Glow and grid effects in `globals.css` use the new colors.
+- `Button`: primary glows cyan; `secondary` is now royal blue. `Card`: hover uses a cyan border and glow.
+  `Badge`: larger padding, and `warning` uses energy orange. Inputs and selects use `bg-surface` and `border-border`.
+- `IconBox`: `amber` tone renamed to `energy`; `sky` is now soft cyan. Hero titles are `text-white`.
+  Remaining raw sky and amber colors moved onto the palette.
+
 ## [4.2.0] - 2026-10-31
 
 ### Changed

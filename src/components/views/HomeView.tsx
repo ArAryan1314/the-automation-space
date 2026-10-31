@@ -43,7 +43,7 @@ import {
   AUTOMATION_STUDIO_FAQS,
 } from "@/data/automationData";
 
-const SERVICE_TONES = ["primary", "sky", "accent", "amber"] as const;
+const SERVICE_TONES = ["primary", "sky", "accent", "energy"] as const;
 
 export function HomeView() {
   const [formData, setFormData] = useState({
@@ -97,7 +97,7 @@ export function HomeView() {
               <span>Executive & Technical Recruitment Practice</span>
             </Badge>
 
-            <Heading as="h1" size="h1">
+            <Heading as="h1" size="h1" className="text-white">
               Precision Talent Search for{" "}
               <span className="gradient-text">Frontier Engineering Teams</span>
             </Heading>
@@ -355,7 +355,7 @@ export function HomeView() {
           {AUTOMATION_STUDIO_TESTIMONIALS.map((t, i) => (
             <Card key={i} className="p-6 flex flex-col justify-between">
               <div className="space-y-4">
-                <div className="flex items-center gap-0.5 text-amber-400">
+                <div className="flex items-center gap-0.5 text-energy">
                   {[...Array(5)].map((_, idx) => (
                     <Star key={idx} className="h-4 w-4 fill-current" />
                   ))}
@@ -365,7 +365,7 @@ export function HomeView() {
                 </Text>
               </div>
               <div className="mt-6 pt-5 border-t border-border flex items-center gap-3">
-                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-sky-500 text-primary-foreground text-sm font-bold flex items-center justify-center flex-shrink-0">
+                <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-sm font-bold flex items-center justify-center flex-shrink-0">
                   {t.name.split(" ").map((n) => n[0]).join("").slice(0, 2)}
                 </div>
                 <div className="text-sm">

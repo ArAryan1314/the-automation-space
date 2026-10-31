@@ -77,7 +77,7 @@ export function CaseStudiesView() {
         <div className="space-y-8">
           {caseStudies.map((cs, idx) => {
             const blocks = [
-              { label: "The Challenge", icon: <AlertCircle />, tone: "amber" as const, text: cs.challenge },
+              { label: "The Challenge", icon: <AlertCircle />, tone: "energy" as const, text: cs.challenge },
               { label: "The Solution", icon: <Compass />, tone: "sky" as const, text: cs.solution },
               { label: "Verified Outcome", icon: <CheckCircle2 />, tone: "primary" as const, text: cs.outcome },
             ];

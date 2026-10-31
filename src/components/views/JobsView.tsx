@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
+  Briefcase,
+  Loader2,
   Search,
   MapPin,
   DollarSign,
@@ -30,20 +32,44 @@ import {
   TabsList,
   TabsTrigger,
 } from "@/components/ui";
-import { FEATURED_JOBS, JobListing } from "@/data/agencyData";
+import { JOB_TYPES, JobListing } from "@/data/agencyData";
+import { timeAgo } from "@/lib/utils";
+import { callApi } from "@/lib/api";
+
+const emptyApplication = { name: "", email: "", profileUrl: "" };
 
 export function JobsView() {
+  const [jobs, setJobs] = useState<JobListing[]>([]);
+  const [jobsStatus, setJobsStatus] = useState<"loading" | "ready" | "error">("loading");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDept, setSelectedDept] = useState("All");
   const [selectedType, setSelectedType] = useState("All");
   const [selectedJob, setSelectedJob] = useState<JobListing | null>(null);
   const [applicationSuccess, setApplicationSuccess] = useState(false);
-  const [candidateEmail, setCandidateEmail] = useState("");
+  const [application, setApplication] = useState(emptyApplication);
+  const [applying, setApplying] = useState(false);
+  const [applyError, setApplyError] = useState("");
 
-  const departments = ["All", "AI & Machine Learning", "Core Engineering", "Executive Leadership", "Cybersecurity & InfoSec", "Frontend Experience"];
-  const jobTypes = ["All", "Full-Time", "Contract", "Executive Retained"];
+  useEffect(() => {
+    let active = true;
+    callApi<JobListing[]>("/api/jobs")
+      .then((result) => {
+        if (!active) return;
+        setJobs(result);
+        setJobsStatus("ready");
+      })
+      .catch(() => {
+        if (active) setJobsStatus("error");
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  const filteredJobs = FEATURED_JOBS.filter((job) => {
+  const departments = ["All", ...Array.from(new Set(jobs.map((job) => job.department))).sort()];
+  const jobTypes = ["All", ...JOB_TYPES];
+
+  const filteredJobs = jobs.filter((job) => {
     const matchesSearch =
       job.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
       job.overview.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -53,15 +79,26 @@ export function JobsView() {
     return matchesSearch && matchesDept && matchesType;
   });
 
-  const handleApply = (e: React.FormEvent) => {
+  const closeApplication = () => {
+    setSelectedJob(null);
+    setApplicationSuccess(false);
+    setApplyError("");
+  };
+
+  const handleApply = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!candidateEmail) return;
-    setApplicationSuccess(true);
-    setTimeout(() => {
-      setApplicationSuccess(false);
-      setSelectedJob(null);
-      setCandidateEmail("");
-    }, 3000);
+    if (!selectedJob) return;
+    setApplying(true);
+    setApplyError("");
+    try {
+      await callApi("/api/applications", { ...application, jobId: selectedJob.id });
+      setApplication(emptyApplication);
+      setApplicationSuccess(true);
+    } catch (err) {
+      setApplyError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
+    } finally {
+      setApplying(false);
+    }
   };
 
   return (
@@ -132,6 +169,25 @@ export function JobsView() {
           </div>
         </div>
 
+        {jobsStatus === "loading" && (
+          <div className="flex justify-center py-16 text-muted-foreground" role="status" aria-label="Loading open roles">
+            <Loader2 className="h-6 w-6 animate-spin" />
+          </div>
+        )}
+
+        {jobsStatus !== "loading" && filteredJobs.length === 0 && (
+          <div className="flex flex-col items-center gap-3 text-center text-sm text-muted-foreground py-16 px-6 bg-card border border-dashed border-border-strong rounded-2xl">
+            <IconBox tone="neutral">
+              <Briefcase />
+            </IconBox>
+            {jobsStatus === "error"
+              ? "We could not load the open roles. Please refresh the page or try again shortly."
+              : jobs.length === 0
+                ? "There are no open roles right now. Please check back soon."
+                : "No roles match your search. Try different keywords or filters."}
+          </div>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredJobs.map((job) => (
             <Card
@@ -143,7 +199,7 @@ export function JobsView() {
                   <Badge variant="default">{job.type}</Badge>
                   <span className="text-xs text-subtle-foreground flex items-center">
                     <Clock className="h-3.5 w-3.5 mr-1" />
-                    {job.postedDate}
+                    {timeAgo(job.postedAt)}
                   </span>
                 </div>
 
@@ -197,7 +253,7 @@ export function JobsView() {
       {/* SECTION 4: Application Modal Component */}
       <Modal
         isOpen={!!selectedJob}
-        onClose={() => setSelectedJob(null)}
+        onClose={closeApplication}
         title={selectedJob ? selectedJob.title : ""}
         description={selectedJob ? `${selectedJob.location} · ${selectedJob.salaryRange}` : ""}
       >
@@ -209,14 +265,27 @@ export function JobsView() {
         ) : (
           <form onSubmit={handleApply} className="space-y-5">
             <div>
+              <Label htmlFor="apply-name">Your Full Name</Label>
+              <Input
+                id="apply-name"
+                type="text"
+                required
+                minLength={2}
+                autoComplete="name"
+                value={application.name}
+                onChange={(e) => setApplication({ ...application, name: e.target.value })}
+              />
+            </div>
+            <div>
               <Label htmlFor="apply-email">Your Confidential Email</Label>
               <Input
                 id="apply-email"
                 type="email"
                 required
+                autoComplete="email"
                 placeholder="name@executive.com"
-                value={candidateEmail}
-                onChange={(e) => setCandidateEmail(e.target.value)}
+                value={application.email}
+                onChange={(e) => setApplication({ ...application, email: e.target.value })}
               />
             </div>
             <div>
@@ -226,8 +295,11 @@ export function JobsView() {
                 type="url"
                 required
                 placeholder="https://linkedin.com/in/yourprofile"
+                value={application.profileUrl}
+                onChange={(e) => setApplication({ ...application, profileUrl: e.target.value })}
               />
             </div>
+            {applyError && <p role="alert" className="text-sm text-red-300">{applyError}</p>}
             <div className="text-xs text-muted-foreground flex items-center gap-1.5">
               <ShieldCheck className="h-4 w-4 text-primary flex-shrink-0" />
               <span>Strict NDA adherence. Your profile is never shared without explicit consent.</span>
@@ -235,10 +307,11 @@ export function JobsView() {
             <Button
               type="submit"
               size="lg"
+              disabled={applying}
               className="w-full"
             >
               <Send className="h-4 w-4" />
-              <span>Transmit Application to Sector Lead</span>
+              <span>{applying ? "Sending..." : "Transmit Application to Sector Lead"}</span>
             </Button>
           </form>
         )}

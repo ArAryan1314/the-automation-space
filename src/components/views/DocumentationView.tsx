@@ -208,7 +208,7 @@ export function DocumentationView() {
                       <span>Admin Operations Console (/admin-login)</span>
                     </h2>
                     <p className="text-[15px] text-body leading-relaxed max-w-prose">
-                      Protected with an administrative passkey for recruitment and operations directors. Displays live server intake queues, raw inquiry details, and candidate-to-client matchmaking records.
+                      Protected with an admin username and password. Admins add, edit and delete the job postings shown on the public jobs page, and review contacts, job applications and intake submissions.
                     </p>
                   </div>
                 </div>

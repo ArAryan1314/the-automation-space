@@ -33,18 +33,20 @@ Each page exports `metadata = pageMetadata(key)`; the key is its entry in `SITE_
 
 ## Commands & Environment
 - Commands: `pnpm dev` · `pnpm build` · `pnpm start` · `pnpm lint` (`lint:fix`) · `pnpm typecheck` · `pnpm check` · `pnpm clean` (see README).
-- Env: `NEXT_PUBLIC_SITE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL` — documented in `.env.example`.
+- Env: `NEXT_PUBLIC_SITE_URL`, `GEMINI_API_KEY`, `GEMINI_MODEL`, `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH`, `DATA_DIR` — documented in `.env.example`.
+- Admin login: `pnpm admin:create [username] [password]` writes the hash to `.env.local`.
 - After code changes: `pnpm graph:rebuild` from the parent `nextDev/` folder.
+- GitHub: this folder is the repo root (`ArAryan1314/the-automation-space`, public). The scheduled task `AutomationSpace GitHub Sync` runs `pnpm sync` every 15 minutes while signed in; its log is `.git/github-sync.log`. Never commit `.env*`, `.data/` or the GoDaddy bundle.
 - GoDaddy bundle: `pnpm build:godaddy` writes `godaddy-dist/` and `godaddy-deployment.zip` (flat `node_modules`, no links). Tested by running it extracted on Windows only, not yet on the Linux host.
-- PHP hosting bundle: `pnpm build:php` writes `../../godaddy-php/` and `../../godaddy-php.zip` (static export + `api/ai-respond.php`). Run it from PowerShell: under Git Bash the final zip step fails because Git's `tar` cannot handle the `D:\` path. Change app code here, never the generated HTML there. Any change to `src/app/api/ai-respond/route.ts` must be mirrored in the PHP classes under `godaddy-php/api/src` (`api/ai-respond.php` only wires them together). Tested on XAMPP Apache 2.4 / PHP 8.2 and standalone PHP 7.4, not yet on GoDaddy.
 
 ## Data Persistence & Hosting Architecture
-1. **Server Lifecycle Memory (`globalStorage.inMemorySubmissions`)**:
-   - Zero external database requirements for session runtime.
-   - Intakes are stored in Node.js server singleton state.
-   - Real-time polling via `/api/ai-respond` (GET / POST).
+1. **JSON files, no database**:
+   - `jobs.json`, `contacts.json`, `applications.json`, `submissions.json`, `login-attempts.json`.
+   - Saved to `.data/` or `DATA_DIR` (`src/lib/server/store.ts`).
+   - `jobs.json` is seeded once from `src/data/seed-jobs.json`. A file that already exists is never reseeded, so deleted jobs stay deleted.
 2. **Security & Confidentiality Protocol**:
    - TLS 1.3 encryption in transit for all candidate and corporate inputs.
    - Zero third-party candidate profile disclosures without written authorization.
    - Dual portal isolation: Candidate self-service cannot inspect administrative candidate queues or internal fee metrics.
-3. **Known limitation**: logins are front-end demos (any credentials accepted) and the Node route's `GET /api/ai-respond` is not access-controlled (the PHP API requires the admin key). Add server-side auth before handling real candidate data.
+3. **Admin auth**: `/admin-login` is enforced on the server with a signed HttpOnly cookie. Reading contacts, applications and intakes, and changing jobs, all require it.
+4. **Known limitations**: `/candidate-login` is still a front-end demo (any credentials accepted). The public contact, apply and intake forms have no spam protection beyond field validation. The admin has one shared login, with no per-user accounts or audit log.

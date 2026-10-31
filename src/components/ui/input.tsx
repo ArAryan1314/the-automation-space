@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 const fieldBase =
-  "w-full rounded-xl border border-input bg-background text-sm text-foreground placeholder:text-subtle-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-4 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50";
+  "w-full rounded-xl border border-input bg-surface text-sm text-foreground placeholder:text-subtle-foreground shadow-sm transition-all focus-visible:outline-none focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 disabled:cursor-not-allowed disabled:opacity-50";
 
 export type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 

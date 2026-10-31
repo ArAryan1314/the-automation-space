@@ -30,16 +30,21 @@ also work from the parent `nextDev/` folder, which forwards them here.
 | `pnpm typecheck` | TypeScript check (`tsc --noEmit`) |
 | `pnpm check` | Typecheck + lint + build — run before deploying |
 | `pnpm clean` | Delete the `.next` build cache |
+| `pnpm sync` | Commit local changes and push them to GitHub (see "GitHub sync and CI") |
+| `pnpm sync:check` | Show whether a sync would pass its safety checks, without changing anything |
+| `pnpm sync:install` | Schedule `pnpm sync` every 15 minutes on Windows |
 
 From the parent `nextDev/` folder: `pnpm install` (graphify tooling), `pnpm install:app`
 (install this app) and `pnpm graph:rebuild` (refresh the knowledge graph after code changes).
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` (git-ignored). Every variable is optional.
+Copy `.env.example` to `.env.local` (git-ignored). Only the admin login is required, and only for `/admin-login` to work.
 
 | Variable | Scope | Purpose |
 |---|---|---|
+| `ADMIN_USERNAME`, `ADMIN_PASSWORD_HASH` | server only | Admin login. Written by `pnpm admin:create`; do not type them by hand |
+| `DATA_DIR` | server only | Folder for stored jobs, contacts, applications and intakes. Default `.data` |
 | `NEXT_PUBLIC_SITE_URL` | public, build time | Base URL for canonical and Open Graph links. Default `https://the-automation-space.com` |
 | `GEMINI_API_KEY` | server only | Drafts personalised intake acknowledgements in `/api/ai-respond`. Empty = template reply |
 | `GEMINI_MODEL` | server only | Gemini model for drafting. Default `gemini-2.5-flash` |
@@ -65,13 +70,17 @@ canonical URL. The same list is shown in the **Site Pages** tab of `/documentati
 | `/faq` | `FAQView` | Frequently asked questions |
 | `/documentation` | `DocumentationView` | User manual, page directory, architecture, developer setup |
 | `/candidate-login` | `CandidateLoginView` | Candidate portal (demo login) |
-| `/admin-login` | `AdminLoginView` | Admin console of intake submissions (demo passkey) |
-| `/portal` | `PortalView` | Developer monitor of stored intakes |
-| `/api/ai-respond` | route handler | `POST` validates and stores an intake; `GET` lists stored intakes |
+| `/admin-login` | `AdminLoginView` | Admin console: job postings, contacts, applications and intakes |
+| `/portal` | `PortalView` | Developer intake form; its list only fills in when signed in as admin |
+| `/api/admin-session` | route handler | `GET` session status; `POST` with `action` `login` or `logout` |
+| `/api/jobs` | route handler | `GET` is public; `POST` with `action` `create`, `update` or `delete` needs an admin |
+| `/api/contacts` | route handler | `POST` without `action` is the contact form; `GET` and `action` `create` or `delete` need an admin |
+| `/api/applications` | route handler | `POST` without `action` is Quick Apply; `GET` and `action` `delete` need an admin |
+| `/api/ai-respond` | route handler | `POST` validates and stores an intake; `GET` lists stored intakes and needs an admin |
 
-> The candidate and admin logins are front-end demos: any credentials are accepted, and
-> `GET /api/ai-respond` is not access-controlled. Add real authentication before storing real data.
-> Intakes live in server memory and are lost on restart.
+> Create the admin login with `pnpm admin:create [username] [password]`. Without a password, a strong one is generated
+> and printed once. Data is saved as JSON files in `.data/` (or `DATA_DIR`).
+> The candidate login is still a front-end demo: any credentials are accepted.
 
 ## Project structure
 
@@ -103,13 +112,22 @@ See **`STYLE_GUIDE.md`** for the design system and **`CHANGELOG.md`** for releas
    }
    ```
 
+## GitHub sync and CI
+
+This folder is the root of the public repository `ArAryan1314/the-automation-space`.
+
+- **Sync:** the Windows task `AutomationSpace GitHub Sync` (set up by `pnpm sync:install`) runs `pnpm sync` every 15 minutes
+  while you are signed in. Every saved change is published, including unfinished work. Results are logged to `.git/github-sync.log`.
+- **Safety:** a sync stops without committing if it would include `.env*` (except `.env.example`), `.data/`, the GoDaddy bundle,
+  a key file, a value from `.env.local`, or something that looks like an API key.
+- **Stored data:** form submissions stay in `.data/` or `DATA_DIR` and are never sent to GitHub, because the repository is public.
+- **CI:** each push builds the Linux deployment bundle, runs typecheck and lint, starts the bundle and requests key routes.
+  Download the result from the run's `godaddy-linux-bundle` artifact. It has no real secrets, so set the variables on the host.
+
+To stop syncing, run `Unregister-ScheduledTask -TaskName 'AutomationSpace GitHub Sync' -Confirm:$false` in PowerShell.
+
 ## Deploying
 
 Hosts such as Vercel detect pnpm from `pnpm-lock.yaml`. Use install command
 `pnpm install --frozen-lockfile` and build command `pnpm build`, and set the environment variables above
 in the host's dashboard.
-
-For PHP-only GoDaddy hosting, run `pnpm build:php` from PowerShell and follow `../../godaddy-php/README_GODADDY.txt`.
-It produces a static copy of the site plus a PHP version of `/api/ai-respond`, whose classes live in
-`godaddy-php/api/src`; there, `GET` requires the admin key (`ADMIN_KEY` or `godaddy-php/api/config.php`), and intakes
-are saved to a file instead of server memory.

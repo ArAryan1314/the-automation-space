@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Auto-sync can push often; only the newest commit needs checking.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4 # version comes from packageManager in package.json
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+
+      # Build first: it generates next-env.d.ts, which typecheck needs and git ignores.
+      - name: Build the Linux deployment bundle
+        run: pnpm build:godaddy
+      - run: pnpm typecheck
+      - run: pnpm lint
+
+      - name: Start the bundle and request key routes
+        working-directory: godaddy-dist
+        env:
+          PORT: 3100
+          DATA_DIR: ${{ runner.temp }}/smoke-data
+        run: |
+          node server.js &
+          server=$!
+          trap 'kill $server' EXIT
+          curl --silent --output /dev/null --retry 15 --retry-delay 1 --retry-connrefused http://127.0.0.1:3100/
+          for route in / /jobs /contact /admin-login /api/jobs; do
+            status=$(curl --silent --output /dev/null --write-out '%{http_code}' "http://127.0.0.1:3100$route")
+            echo "$route -> $status"
+            test "$status" = 200
+          done
+
+      - name: Upload the deployment bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: godaddy-linux-bundle
+          path: godaddy-dist
+          include-hidden-files: true
+          retention-days: 14

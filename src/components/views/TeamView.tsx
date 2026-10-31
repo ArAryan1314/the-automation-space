@@ -55,7 +55,7 @@ export function TeamView() {
               <div>
                 <div className="flex items-start justify-between gap-3 mb-5">
                   <div
-                    className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-sky-500 text-primary-foreground text-xl font-bold flex items-center justify-center shadow-soft ring-4 ring-primary-soft group-hover:scale-105 transition-transform duration-300"
+                    className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-accent text-primary-foreground text-xl font-bold flex items-center justify-center shadow-soft ring-4 ring-primary-soft group-hover:scale-105 transition-transform duration-300"
                     aria-label={spec.name}
                   >
                     {getInitials(spec.name)}

@@ -1,0 +1,102 @@
+[
+  {
+    "id": "job-01",
+    "title": "VP of Artificial Intelligence & LLM Systems",
+    "department": "AI & Machine Learning",
+    "location": "San Francisco, CA (Hybrid / Remote Option)",
+    "type": "Executive Retained",
+    "salaryRange": "$320,000 - $420,000 + Equity",
+    "experienceLevel": "VP",
+    "overview": "Directing generative AI architecture, large model fine-tuning pipelines, and distributed inference clusters for a Series C frontier enterprise.",
+    "skills": [
+      "Large Language Models",
+      "PyTorch",
+      "Kubernetes",
+      "Distributed Training",
+      "MLOps"
+    ]
+  },
+  {
+    "id": "job-02",
+    "title": "Principal Distributed Systems Engineer",
+    "department": "Core Engineering",
+    "location": "New York, NY (Hybrid)",
+    "type": "Full-Time",
+    "salaryRange": "$240,000 - $290,000 + Bonus",
+    "experienceLevel": "Lead",
+    "overview": "Architecting zero-latency financial trading infrastructure and high-throughput transaction brokers operating under millisecond SLA constraints.",
+    "skills": [
+      "Rust",
+      "Go",
+      "Kafka",
+      "Low-Latency Networks",
+      "PostgreSQL"
+    ]
+  },
+  {
+    "id": "job-03",
+    "title": "Chief Product Officer (CPO)",
+    "department": "Executive Leadership",
+    "location": "Austin, TX / Remote",
+    "type": "Executive Retained",
+    "salaryRange": "$350,000 - $460,000 + Founding Equity",
+    "experienceLevel": "C-Suite",
+    "overview": "Leading cross-functional product, UX, and strategic partner roadmap across North America and European enterprise markets.",
+    "skills": [
+      "Product Strategy",
+      "B2B SaaS Growth",
+      "PLG Architecture",
+      "Board Governance"
+    ]
+  },
+  {
+    "id": "job-04",
+    "title": "Staff Cloud Security Architect",
+    "department": "Cybersecurity & InfoSec",
+    "location": "Seattle, WA (Remote Friendly)",
+    "type": "Full-Time",
+    "salaryRange": "$220,000 - $275,000",
+    "experienceLevel": "Senior",
+    "overview": "Spearheading multi-cloud zero-trust network boundaries, SOC2/ISO compliance automation, and confidential enclave encryption standards.",
+    "skills": [
+      "AWS / GCP Security",
+      "Terraform",
+      "Zero Trust",
+      "Threat Modeling",
+      "IAM"
+    ]
+  },
+  {
+    "id": "job-05",
+    "title": "Head of Talent Acquisition & People Ops",
+    "department": "People & Talent",
+    "location": "London, UK / Remote",
+    "type": "Full-Time",
+    "salaryRange": "£140,000 - £180,000",
+    "experienceLevel": "Lead",
+    "overview": "Scaling an EMEA hyper-growth engineering studio from 80 to 250 headcount with structured competency rubrics and diverse pipeline sourcing.",
+    "skills": [
+      "Executive Search",
+      "Global HR Ops",
+      "Headcount Modeling",
+      "Culture Architecture"
+    ]
+  },
+  {
+    "id": "job-06",
+    "title": "Lead Frontend Engineer (Next.js & Design Systems)",
+    "department": "Frontend Experience",
+    "location": "Remote (Global / Americas Timezones)",
+    "type": "Contract",
+    "salaryRange": "$160 - $200 / hr",
+    "experienceLevel": "Lead",
+    "overview": "Engineering fluid micro-interactions, responsive high-performance dashboards, and component design tokens for premier analytics portals.",
+    "skills": [
+      "Next.js",
+      "TypeScript",
+      "Tailwind CSS",
+      "Web Vitals",
+      "Canvas / WebGL"
+    ]
+  }
+]

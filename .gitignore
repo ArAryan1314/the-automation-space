@@ -20,6 +20,9 @@
 # production
 /build
 
+# stored jobs, contacts, applications and intakes (personal data)
+/.data/
+
 # misc
 .DS_Store
 *.pem
@@ -40,3 +43,11 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# deployment bundles contain a copy of .env.local (admin hash, API keys)
+/godaddy-dist/
+/godaddy-deployment.zip
+
+# local tooling output and a stray build folder
+/.engram/
+/recruitment-agency/

@@ -10,8 +10,8 @@ const alertBannerVariants = cva(
       variant: {
         success: "bg-emerald-500/10 border-emerald-500/30 text-emerald-200",
         error: "bg-red-500/10 border-red-500/30 text-red-200",
-        warning: "bg-amber-500/10 border-amber-500/30 text-amber-200",
-        info: "bg-sky-500/10 border-sky-500/30 text-sky-200",
+        warning: "bg-energy-soft border-energy/40 text-foreground",
+        info: "bg-accent-soft border-accent/40 text-foreground",
       },
     },
     defaultVariants: {
@@ -38,8 +38,8 @@ export function AlertBanner({
   const defaultIcons = {
     success: <CheckCircle2 className="h-5 w-5 text-emerald-400 flex-shrink-0" />,
     error: <ShieldAlert className="h-5 w-5 text-red-400 flex-shrink-0" />,
-    warning: <AlertTriangle className="h-5 w-5 text-amber-400 flex-shrink-0" />,
-    info: <Info className="h-5 w-5 text-sky-400 flex-shrink-0" />,
+    warning: <AlertTriangle className="h-5 w-5 text-energy flex-shrink-0" />,
+    info: <Info className="h-5 w-5 text-primary flex-shrink-0" />,
   };
 
   return (

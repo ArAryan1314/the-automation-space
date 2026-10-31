@@ -123,7 +123,7 @@ function PageHero({
     >
       <div className={cn("space-y-5", align === "center" ? "text-center max-w-3xl mx-auto" : "max-w-3xl")}>
         {badge && <div className="inline-flex">{badge}</div>}
-        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.1] text-foreground">
+        <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight leading-[1.1] text-white">
           {title}
         </h1>
         {description && (

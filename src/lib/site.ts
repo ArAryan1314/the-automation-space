@@ -109,7 +109,7 @@ export const SITE_PAGES = {
   adminLogin: {
     path: "/admin-login",
     title: "Admin Console",
-    description: "Operations console listing every intake submission and its drafted acknowledgement (demo passkey).",
+    description: "Password-protected console to manage job postings and review contacts, job applications and intake submissions.",
     group: "Portals",
   },
   portal: {
